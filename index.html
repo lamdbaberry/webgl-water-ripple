@@ -35,7 +35,8 @@ button.active{background:rgba(255,255,255,0.9);color:#000;font-weight:700}
 <button id="startBtn" style="padding:16px 48px;font-size:18px;background:rgba(255,255,255,0.9);color:#000;border:none;border-radius:12px;font-weight:600;cursor:pointer;">开始体验</button>
 <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;">需要摄像头权限</p>
 </div><div id="tip">将手指伸到镜头前产生波纹</div>
-<div id="shaderError" style="display:none"></div>
+<div id="shaderError" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,0,0,0.9);padding:20px;border-radius:12px;max-width:90%;z-index:2000;color:#fff;font-size:14px;text-align:center;"></div>
+  <div id="statusMsg" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);padding:12px 24px;border-radius:24px;z-index:1001;color:#fff;font-size:14px;display:none;"></div>
 
 <script type="module">
 import { Hands } from "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js";
@@ -282,13 +283,12 @@ async function startCamera(){
       }
     };
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    showStatus("请求摄像头权限..."); const stream = await navigator.mediaDevices.getUserMedia(constraints);
     camera = stream;
     videoElement.srcObject = stream;
     videoElement.onloadedmetadata = () => {
       videoElement.play();
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
+      canvas.width = videoElement.videoWidth; canvas.height = videoElement.videoHeight; showStatus("摄像头已开启", 2000);
       gl.viewport(0,0,canvas.width,canvas.height);
       if(isFrontCam) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       else gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -305,7 +305,7 @@ async function startCamera(){
 
   } catch(err) {
     console.error("Camera error:", err);
-    shaderErrorEl.textContent = "摄像头权限被拒绝或不可用: " + err.message;
+    shaderErrorEl.textContent = "摄像头权限被拒绝或不可用:\n" + err.message; shaderErrorEl.style.display = "block"; showStatus("摄像头权限被拒绝", 5000);
     shaderErrorEl.style.display = "block";
   }
 }
@@ -370,7 +370,12 @@ function setUniform(program, name, ...args){
   else if(args.length===2) gl.uniform1i(loc, args[0]), gl.activeTexture(gl.TEXTURE0+args[0]), gl.bindTexture(gl.TEXTURE_2D, args[1]);
 }
 
-document.getElementById("startBtn").onclick=()=>{document.getElementById("startOverlay").style.display="none";startCamera().then(()=>requestAnimationFrame(render));};
+document.getElementById("startBtn").onclick=async()=>{
+  document.getElementById("startOverlay").style.display="none";
+  showStatus("正在启动摄像头...");
+  await startCamera();
+  requestAnimationFrame(render);
+};
 </script>
 </body>
 </html>
