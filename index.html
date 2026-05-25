@@ -27,7 +27,7 @@ button.active{background:rgba(255,255,255,0.9);color:#000;font-weight:700}
   <button id="modeCrystal">CRYSTAL</button>
 </div>
 <button id="switchCam">切换摄像头</button>
-<div id="startOverlay" style="position:fixed;inset:0;background:#000;display:flex;z-index:1000;flex-direction:column;align-items:center;justify-content:center;z-index:100;">
+<div id="startOverlay" style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;">
 <div style="text-align:center;color:#fff;font-size:18px;margin-bottom:32px;">
 <p style="margin:0 0 12px;font-size:24px;font-weight:600;">WebGL 水波纹</p>
 <p style="margin:0;opacity:0.7;font-size:14px;">手势识别交互</p>
@@ -371,12 +371,21 @@ function setUniform(program, name, ...args){
   else if(args.length===2) gl.uniform1i(loc, args[0]), gl.activeTexture(gl.TEXTURE0+args[0]), gl.bindTexture(gl.TEXTURE_2D, args[1]);
 }
 
-document.getElementById("startBtn").onclick=async()=>{
-  document.getElementById("startOverlay").style.display="none";
-  showStatus("正在启动摄像头...");
-  await startCamera();
-  requestAnimationFrame(render);
-};
+document.getElementById("startBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("startBtn");
+  btn.textContent = "正在启动...";
+  btn.disabled = true;
+  document.getElementById("startOverlay").style.opacity = "0.5";
+  try {
+    await startCamera();
+    document.getElementById("startOverlay").style.display = "none";
+    requestAnimationFrame(render);
+  } catch(e) {
+    btn.textContent = "启动失败，点击重试";
+    btn.disabled = false;
+    document.getElementById("startOverlay").style.opacity = "1";
+  }
+});
 </script>
 </body>
 </html>
