@@ -285,12 +285,17 @@ async function startCamera(){
       }
     };
 
-    showStatus("请求摄像头权限..."); const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    showStatus("请求摄像头权限..."); console.log("DEBUG: requesting camera...");
+  showStatus("请求摄像头权限...");
+  const stream = await navigator.mediaDevices.getUserMedia(constraints);
     camera = stream;
     videoElement.srcObject = stream;
     videoElement.onloadedmetadata = () => {
       videoElement.play();
-      canvas.width = videoElement.videoWidth; canvas.height = videoElement.videoHeight; showStatus("摄像头已开启", 2000);
+      console.log("DEBUG: camera started");
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+  document.getElementById("startOverlay").innerHTML = '<div style="text-align:center;color:#0f0;padding:20px;">摄像头已开启！</div>'; showStatus("摄像头已开启", 2000);
       gl.viewport(0,0,canvas.width,canvas.height);
       if(isFrontCam) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       else gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -390,6 +395,9 @@ document.getElementById("modeCrystal").onclick = () => {
 document.getElementById("switchCam").onclick = () => { isFrontCam = !isFrontCam; startCamera(); };
 
 document.getElementById("startBtn").onclick = async function(){
+  console.log("DEBUG: startBtn clicked");
+  document.getElementById("startOverlay").innerHTML = '<div style="text-align:center;color:#fff;padding:20px;"><p>正在启动摄像头...</p><p style="font-size:12px;opacity:0.7;margin-top:10px;">请允许摄像头权限</p></div>';
+
   this.textContent = "正在启动...";
   document.getElementById("startOverlay").style.opacity = "0.5";
   try {
