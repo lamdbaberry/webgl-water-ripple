@@ -42,7 +42,8 @@ button.active{background:rgba(255,255,255,0.9);color:#000;font-weight:700}
 import { Hands } from "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js";
 
 const canvas = document.getElementById("glCanvas");
-const gl = canvas.getContext("webgl", {preserveDrawingBuffer:false});
+const gl = canvas.getContext("webgl", {preserveDrawingBuffer:false}) || canvas.getContext("experimental-webgl", {preserveDrawingBuffer:false});
+if(!gl){shaderErrorEl.textContent="您的浏览器不支持WebGL";shaderErrorEl.style.display="block";}
 const shaderErrorEl = document.getElementById("shaderError");
 let isFrontCam = true;
 let currentMode = 0;
