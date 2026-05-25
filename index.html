@@ -23,16 +23,16 @@ button.active{background:rgba(255,255,255,0.9);color:#000;font-weight:700}
 <body>
 <canvas id="glCanvas"></canvas>
 <div id="ui">
-  <button id="modeLiquid" class="active">LIQUID</button>
-  <button id="modeCrystal">CRYSTAL</button>
+  <div id="modeLiquid" class="active" style="padding:14px 24px;border:none;border-radius:12px;background:rgba(255,255,255,0.5);color:#000;font-size:16px;font-weight:600;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;">LIQUID</div>
+  <div id="modeCrystal" style="padding:14px 24px;border:none;border-radius:12px;background:rgba(255,255,255,0.2);color:#fff;font-size:16px;font-weight:600;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;">CRYSTAL</div>
 </div>
-<button id="switchCam">切换摄像头</button>
+<div id="switchCam" style="padding:14px 24px;border:none;border-radius:12px;background:rgba(255,255,255,0.2);color:#fff;font-size:16px;font-weight:600;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;">切换摄像头</div>
 <div id="startOverlay" style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;">
 <div style="text-align:center;color:#fff;font-size:18px;margin-bottom:32px;">
 <p style="margin:0 0 12px;font-size:24px;font-weight:600;">WebGL 水波纹</p>
 <p style="margin:0;opacity:0.7;font-size:14px;">手势识别交互</p>
 </div>
-<button id="startBtn" style="padding:16px 48px;font-size:18px;background:rgba(255,255,255,0.9);color:#000;border:none;border-radius:12px;font-weight:600;cursor:pointer;">开始体验</button>
+<div id="startBtn" style="padding:16px 48px;font-size:18px;background:rgba(255,255,255,0.95);color:#000;border-radius:12px;font-weight:600;text-align:center;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;" ontouchstart="this.style.background='rgba(200,200,200,0.95)'" ontouchend="this.style.background='rgba(255,255,255,0.95)'">开始体验</div>
 <p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;">需要摄像头权限</p>
 </div><div id="tip">将手指伸到镜头前产生波纹</div>
 <div id="shaderError" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,0,0,0.9);padding:20px;border-radius:12px;max-width:90%;z-index:2000;color:#fff;font-size:14px;text-align:center;"></div>
@@ -371,6 +371,23 @@ function setUniform(program, name, ...args){
   if(args.length===1) gl.uniform1f(loc, args[0]);
   else if(args.length===2) gl.uniform1i(loc, args[0]), gl.activeTexture(gl.TEXTURE0+args[0]), gl.bindTexture(gl.TEXTURE_2D, args[1]);
 }
+
+// iOS touch compatible handlers
+document.getElementById("modeLiquid").onclick = () => {
+  currentMode = 0;
+  document.querySelectorAll("#ui > div").forEach(b => {
+    b.style.background = b.id === "modeLiquid" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)";
+    b.style.color = b.id === "modeLiquid" ? "#000" : "#fff";
+  });
+};
+document.getElementById("modeCrystal").onclick = () => {
+  currentMode = 1;
+  document.querySelectorAll("#ui > div").forEach(b => {
+    b.style.background = b.id === "modeCrystal" ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.2)";
+    b.style.color = b.id === "modeCrystal" ? "#000" : "#fff";
+  });
+};
+document.getElementById("switchCam").onclick = () => { isFrontCam = !isFrontCam; startCamera(); };
 
 document.getElementById("startBtn").addEventListener("click", async () => {
   const btn = document.getElementById("startBtn");
