@@ -389,21 +389,19 @@ document.getElementById("modeCrystal").onclick = () => {
 };
 document.getElementById("switchCam").onclick = () => { isFrontCam = !isFrontCam; startCamera(); };
 
-document.getElementById("startBtn").addEventListener("click", async () => {
-  const btn = document.getElementById("startBtn");
-  btn.textContent = "正在启动...";
-  btn.disabled = true;
+document.getElementById("startBtn").onclick = async function(){
+  this.textContent = "正在启动...";
   document.getElementById("startOverlay").style.opacity = "0.5";
   try {
     await startCamera();
     document.getElementById("startOverlay").style.display = "none";
     requestAnimationFrame(render);
   } catch(e) {
-    btn.textContent = "启动失败，点击重试";
-    btn.disabled = false;
+    this.textContent = "启动失败，点击重试";
+    this.disabled = false;
     document.getElementById("startOverlay").style.opacity = "1";
   }
-});
+};
 </script>
 </body>
 </html>
