@@ -39,7 +39,6 @@ button.active{background:rgba(255,255,255,0.9);color:#000;font-weight:700}
 
 <script type="module">
 import { Hands } from "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js";
-import { Camera } from "https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/camera.js";
 
 const canvas = document.getElementById("glCanvas");
 const gl = canvas.getContext("webgl", {preserveDrawingBuffer:false});
@@ -258,15 +257,57 @@ function onHandResults(results){
   }
 }
 
-let camera;
+let camera = null;
+let videoElement;
 async function startCamera(){
-  if(camera) camera.stop();
-  camera = new Camera({video: {facingMode: isFrontCam ? "user" : "environment"}}, {onFrame:async()=>await hands.send({image:camera.video})});
-  await camera.start();
-  canvas.width = camera.video.videoWidth;
-  canvas.height = camera.video.videoHeight;
-  gl.viewport(0,0,canvas.width,canvas.height);
-  if(isFrontCam) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  try {
+    // Create video element if not exists
+    if(!videoElement){
+      videoElement = document.createElement('video');
+      videoElement.playsInline = true;
+      videoElement.muted = true;
+      document.body.appendChild(videoElement);
+    }
+
+    // Stop existing stream
+    if(camera && camera.stop) camera.stop();
+    if(camera && camera.getTracks) camera.getTracks().forEach(t=>t.stop());
+
+    // Request camera access with proper constraints
+    const constraints = {
+      video: {
+        facingMode: isFrontCam ? "user" : "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    camera = stream;
+    videoElement.srcObject = stream;
+    videoElement.onloadedmetadata = () => {
+      videoElement.play();
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      gl.viewport(0,0,canvas.width,canvas.height);
+      if(isFrontCam) gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      else gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    };
+
+    // Send frames to MediaPipe
+    const sendFrames = async () => {
+      if(videoElement.readyState >= 2) {
+        await hands.send({image: videoElement});
+      }
+      requestAnimationFrame(sendFrames);
+    };
+    sendFrames();
+
+  } catch(err) {
+    console.error("Camera error:", err);
+    shaderErrorEl.textContent = "摄像头权限被拒绝或不可用: " + err.message;
+    shaderErrorEl.style.display = "block";
+  }
 }
 
 document.getElementById("modeLiquid").onclick=()=>{currentMode=0;document.querySelectorAll("#ui button").forEach(b=>b.classList.remove("active"));document.getElementById("modeLiquid").classList.add("active");};
