@@ -50,7 +50,7 @@ let isFrontCam = true;
 let currentMode = 0;
 let tipPositions = new Float32Array(20);
 
-const vertexShaderSource = \`
+const vertexShaderSource = `
 attribute vec2 aPos;
 attribute vec2 aUV;
 varying vec2 vUV;
@@ -58,9 +58,9 @@ void main(){
   gl_Position = vec4(aPos,0.,1.);
   vUV = aUV;
 }
-\`;
+`;
 
-const waveSimShader = \`
+const waveSimShader = `
 precision mediump float;
 uniform sampler2D uWaveTex;
 uniform float uDelta;
@@ -96,7 +96,7 @@ void main(){
 }
 \`;
 
-const renderShader = \`
+const renderShader = `
 precision mediump float;
 uniform sampler2D uCamTex;
 uniform sampler2D uWaveTex;
@@ -164,7 +164,7 @@ void main(){
 }
 \`;
 
-const injectShader = \`
+const injectShader = `
 precision mediump float;
 uniform sampler2D uWaveTex;
 uniform float uAspect;
